@@ -1,5 +1,5 @@
 //=============================================================================
-// RPGツクールMZ - LL_StandingPictureBattle.js v1.0.0
+// RPGツクールMZ - LL_StandingPictureBattle.js v1.0.1
 //-----------------------------------------------------------------------------
 // ルルの教会 (Lulu's Church)
 // https://nine-yusha.com/
@@ -25,7 +25,7 @@
  *   立ち絵表示ON・OFF: 立ち絵の表示・非表示を一括制御します。
  *
  * 作者: ルルの教会
- * 作成日: 2020/10/2
+ * 作成日: 2020/10/6
  *
  * このプラグインはMITライセンスで配布します。
  * https://opensource.org/licenses/mit-license.php
@@ -555,6 +555,7 @@
 					// HPレートを取得
 					let hpRate = commandActor.mhp > 0 ? commandActor.hp / commandActor.mhp * 100 : 0;
 					if (sbPicture) {
+						sbPicture = JSON.parse(JSON.stringify(sbPicture));
 						if (activeCommandActorId != commandActor._actorId) {
 							activeCommandActorId = commandActor._actorId;
 							refSbPicture = true;
@@ -577,7 +578,7 @@
 
 			// 立ち絵ピクチャ作成
 			if (sbPicture && refSbPicture) {
-				this.refresh(elm._spbSprite, sbPicture, 1);
+				this.refresh(elm._spbSprite, sbPicture);
 				refSbPicture = false;
 			}
 
