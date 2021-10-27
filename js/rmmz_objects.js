@@ -1,5 +1,5 @@
 //=============================================================================
-// rmmz_objects.js v1.0.2
+// rmmz_objects.js v1.3.3
 //=============================================================================
 
 //-----------------------------------------------------------------------------
@@ -403,6 +403,14 @@ Game_System.prototype.mainFontSize = function() {
 
 Game_System.prototype.windowPadding = function() {
     return 12;
+};
+
+Game_System.prototype.windowOpacity = function() {
+    if ("windowOpacity" in $dataSystem.advanced) {
+        return $dataSystem.advanced.windowOpacity;
+    } else {
+        return 192;
+    }
 };
 
 //-----------------------------------------------------------------------------
@@ -3342,6 +3350,10 @@ Game_Battler.prototype.requestMotionRefresh = function() {
     this._motionRefresh = true;
 };
 
+Game_Battler.prototype.cancelMotionRefresh = function() {
+    this._motionRefresh = false;
+};
+
 Game_Battler.prototype.select = function() {
     this._selected = true;
 };
@@ -4706,7 +4718,7 @@ Game_Actor.prototype.makeActionList = function() {
 Game_Actor.prototype.makeAutoBattleActions = function() {
     for (let i = 0; i < this.numActions(); i++) {
         const list = this.makeActionList();
-        let maxValue = Number.MIN_VALUE;
+        let maxValue = -Number.MAX_VALUE;
         for (const action of list) {
             const value = action.evaluate();
             if (value > maxValue) {
@@ -6333,11 +6345,11 @@ Game_Map.prototype.isOverworld = function() {
 };
 
 Game_Map.prototype.screenTileX = function() {
-    return Graphics.width / this.tileWidth();
+    return Math.round((Graphics.width / this.tileWidth()) * 16) / 16;
 };
 
 Game_Map.prototype.screenTileY = function() {
-    return Graphics.height / this.tileHeight();
+    return Math.round((Graphics.height / this.tileHeight()) * 16) / 16;
 };
 
 Game_Map.prototype.adjustX = function(x) {
@@ -7841,6 +7853,7 @@ Game_Character.prototype.processRouteEnd = function() {
     } else if (this._moveRouteForcing) {
         this._moveRouteForcing = false;
         this.restoreMoveRoute();
+        this.setMovementSuccess(false);
     }
 };
 
@@ -8188,11 +8201,11 @@ Game_Player.prototype.isCollided = function(x, y) {
 };
 
 Game_Player.prototype.centerX = function() {
-    return (Graphics.width / $gameMap.tileWidth() - 1) / 2.0;
+    return ($gameMap.screenTileX() - 1) / 2;
 };
 
 Game_Player.prototype.centerY = function() {
-    return (Graphics.height / $gameMap.tileHeight() - 1) / 2.0;
+    return ($gameMap.screenTileY() - 1) / 2;
 };
 
 Game_Player.prototype.center = function(x, y) {
@@ -10095,7 +10108,7 @@ Game_Interpreter.prototype.command119 = function(params) {
         const command = this._list[i];
         if (command.code === 118 && command.parameters[0] === labelName) {
             this.jumpTo(i);
-            return;
+            break;
         }
     }
     return true;
@@ -11267,7 +11280,8 @@ Game_Interpreter.prototype.pluginCommand = function() {
 
 // Plugin Command
 Game_Interpreter.prototype.command357 = function(params) {
-    PluginManager.callCommand(this, params[0], params[1], params[3]);
+    const pluginName = Utils.extractFileName(params[0]);
+    PluginManager.callCommand(this, pluginName, params[1], params[3]);
     return true;
 };
 
